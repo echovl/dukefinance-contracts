@@ -14,6 +14,7 @@ contract TombGenesisRewardPool {
 
     // governance
     address public operator;
+    address public devFund;
 
     // Info of each user.
     struct UserInfo {
@@ -28,6 +29,7 @@ contract TombGenesisRewardPool {
         uint256 lastRewardTime; // Last time that TOMB distribution occurs.
         uint256 accTombPerShare; // Accumulated TOMB per share, times 1e18. See below.
         bool isStarted; // if lastRewardBlock has passed
+        uint256 depositFee;
     }
 
     IERC20 public tomb;
@@ -50,6 +52,7 @@ contract TombGenesisRewardPool {
     uint256 public tombPerSecond = 0.19097 ether; // 33000 TOMB / (48h * 60min * 60s)
     uint256 public runningTime = 48 hours;
     uint256 public constant TOTAL_REWARDS = 11000 ether;
+    uint256 public constant MAX_DEPOSIT_FEE = 100; // 10% max deposit fee
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
@@ -58,13 +61,16 @@ contract TombGenesisRewardPool {
 
     constructor(
         address _tomb,
-        uint256 _poolStartTime
+        uint256 _poolStartTime,
+        address _devFund
     ) public {
         require(block.timestamp < _poolStartTime, "late");
+        require(_devFund != address(0), "devFund must be a non-zero address");
         if (_tomb != address(0)) tomb = IERC20(_tomb);
         poolStartTime = _poolStartTime;
         poolEndTime = poolStartTime + runningTime;
         operator = msg.sender;
+        devFund = _devFund;
     }
 
     modifier onlyOperator() {
@@ -84,9 +90,13 @@ contract TombGenesisRewardPool {
         uint256 _allocPoint,
         IERC20 _token,
         bool _withUpdate,
-        uint256 _lastRewardTime
+        uint256 _lastRewardTime,
+        uint256 _depositFee
     ) public onlyOperator {
         checkPoolDuplicate(_token);
+
+        require(_depositFee <= MAX_DEPOSIT_FEE, "TombGenesisPool: max deposit fee");
+
         if (_withUpdate) {
             massUpdatePools();
         }
@@ -113,7 +123,8 @@ contract TombGenesisRewardPool {
             allocPoint : _allocPoint,
             lastRewardTime : _lastRewardTime,
             accTombPerShare : 0,
-            isStarted : _isStarted
+            isStarted : _isStarted,
+            depositFee : _depositFee
             }));
         if (_isStarted) {
             totalAllocPoint = totalAllocPoint.add(_allocPoint);
@@ -121,7 +132,9 @@ contract TombGenesisRewardPool {
     }
 
     // Update the given pool's TOMB allocation point. Can only be called by the owner.
-    function set(uint256 _pid, uint256 _allocPoint) public onlyOperator {
+    function set(uint256 _pid, uint256 _allocPoint, uint256 _depositFee) public onlyOperator {
+        require(_depositFee <= MAX_DEPOSIT_FEE, "TombGenesisPool: max deposit fee");
+
         massUpdatePools();
         PoolInfo storage pool = poolInfo[_pid];
         if (pool.isStarted) {
@@ -130,6 +143,7 @@ contract TombGenesisRewardPool {
             );
         }
         pool.allocPoint = _allocPoint;
+        pool.depositFee = _depositFee;
     }
 
     // Return accumulate rewards over the given _from to _to block.
@@ -205,8 +219,12 @@ contract TombGenesisRewardPool {
             }
         }
         if (_amount > 0) {
-            pool.token.safeTransferFrom(_sender, address(this), _amount);
+            uint256 devFee = _amount.mul(pool.depositFee).div(1000);
+            _amount = _amount.sub(devFee);
             user.amount = user.amount.add(_amount);
+
+            pool.token.safeTransferFrom(_sender, address(this), _amount);
+            pool.token.safeTransferFrom(_sender, devFund, devFee); 
         }
         user.rewardDebt = user.amount.mul(pool.accTombPerShare).div(1e18);
         emit Deposit(_sender, _pid, _amount);
@@ -257,6 +275,10 @@ contract TombGenesisRewardPool {
 
     function setOperator(address _operator) external onlyOperator {
         operator = _operator;
+    }
+
+    function setDevFund(address _devFund) external onlyOperator {
+        devFund = _devFund;
     }
 
     function governanceRecoverUnsupported(IERC20 _token, uint256 amount, address to) external onlyOperator {

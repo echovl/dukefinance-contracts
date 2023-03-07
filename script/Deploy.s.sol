@@ -40,7 +40,7 @@ contract Deploy is Script {
         usdc.mint(tx.origin, 100000 ether);
 
         // Genesis pools
-        TombGenesisRewardPool genesisPool = new TombGenesisRewardPool(address(tomb), genesisStartTime);
+        TombGenesisRewardPool genesisPool = new TombGenesisRewardPool(address(tomb), genesisStartTime, devFund);
 
         // Fund genesis pool
         tomb.distributeReward(address(genesisPool));
@@ -60,8 +60,8 @@ contract Deploy is Script {
         address lpPair = UniswapV2Library.pairFor(factory, address(tomb), address(usdc));
 
         // Setup genesis pools
-        genesisPool.add(1000, IERC20(lpPair), false, 0);
-        genesisPool.add(1000, IERC20(usdc), true, 0);
+        genesisPool.add(1000, IERC20(lpPair), false, 0, 10);
+        genesisPool.add(1000, IERC20(usdc), true, 0, 10);
 
         vm.stopBroadcast();
     }
