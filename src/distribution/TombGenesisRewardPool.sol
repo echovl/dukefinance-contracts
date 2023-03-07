@@ -31,7 +31,6 @@ contract TombGenesisRewardPool {
     }
 
     IERC20 public tomb;
-    address public shiba;
 
     // Info of each pool.
     PoolInfo[] public poolInfo;
@@ -48,17 +47,9 @@ contract TombGenesisRewardPool {
     // The time when TOMB mining ends.
     uint256 public poolEndTime;
 
-    // TESTNET
-    uint256 public tombPerSecond = 3.0555555 ether; // 11000 TOMB / (1h * 60min * 60s)
-    uint256 public runningTime = 24 hours; // 1 hours
+    uint256 public tombPerSecond = 0.19097 ether; // 33000 TOMB / (48h * 60min * 60s)
+    uint256 public runningTime = 48 hours;
     uint256 public constant TOTAL_REWARDS = 11000 ether;
-    // END TESTNET
-
-    // MAINNET
-    // uint256 public tombPerSecond = 0.11574 ether; // 10000 TOMB / (24h * 60min * 60s)
-    // uint256 public runningTime = 1 days; // 1 days
-    // uint256 public constant TOTAL_REWARDS = 10000 ether;
-    // END MAINNET
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
@@ -67,12 +58,10 @@ contract TombGenesisRewardPool {
 
     constructor(
         address _tomb,
-        address _shiba,
         uint256 _poolStartTime
     ) public {
         require(block.timestamp < _poolStartTime, "late");
         if (_tomb != address(0)) tomb = IERC20(_tomb);
-        if (_shiba != address(0)) shiba = _shiba;
         poolStartTime = _poolStartTime;
         poolEndTime = poolStartTime + runningTime;
         operator = msg.sender;
@@ -217,11 +206,7 @@ contract TombGenesisRewardPool {
         }
         if (_amount > 0) {
             pool.token.safeTransferFrom(_sender, address(this), _amount);
-            if(address(pool.token) == shiba) {
-                user.amount = user.amount.add(_amount.mul(9900).div(10000));
-            } else {
-                user.amount = user.amount.add(_amount);
-            }
+            user.amount = user.amount.add(_amount);
         }
         user.rewardDebt = user.amount.mul(pool.accTombPerShare).div(1e18);
         emit Deposit(_sender, _pid, _amount);

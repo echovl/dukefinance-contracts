@@ -22,12 +22,8 @@ contract Tomb is ERC20Burnable, Operator {
     using SafeMath8 for uint8;
     using SafeMath for uint256;
 
-    // Initial distribution for the first 24h genesis pools
-    uint256 public constant INITIAL_GENESIS_POOL_DISTRIBUTION = 11000 ether;
-    // Initial distribution for the day 2-5 TOMB-WFTM LP -> TOMB pool
-    uint256 public constant INITIAL_TOMB_POOL_DISTRIBUTION = 140000 ether;
-    // Distribution for airdrops wallet
-    uint256 public constant INITIAL_AIRDROP_WALLET_DISTRIBUTION = 9000 ether;
+    // Initial distribution for the first 48h genesis pools
+    uint256 public constant INITIAL_GENESIS_POOL_DISTRIBUTION = 33000 ether;
 
     // Have the rewards been distributed to the pools
     bool public rewardPoolDistributed = false;
@@ -258,18 +254,12 @@ contract Tomb is ERC20Burnable, Operator {
      * @notice distribute to reward pool (only once)
      */
     function distributeReward(
-        address _genesisPool,
-        address _tombPool,
-        address _airdropWallet
+        address _genesisPool
     ) external onlyOperator {
         require(!rewardPoolDistributed, "only can distribute once");
         require(_genesisPool != address(0), "!_genesisPool");
-        require(_tombPool != address(0), "!_tombPool");
-        require(_airdropWallet != address(0), "!_airdropWallet");
         rewardPoolDistributed = true;
         _mint(_genesisPool, INITIAL_GENESIS_POOL_DISTRIBUTION);
-        _mint(_tombPool, INITIAL_TOMB_POOL_DISTRIBUTION);
-        _mint(_airdropWallet, INITIAL_AIRDROP_WALLET_DISTRIBUTION);
     }
 
     function governanceRecoverUnsupported(
