@@ -2,9 +2,9 @@
 
 pragma solidity 0.6.12;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "openzeppelin-contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-contracts/token/ERC20/SafeERC20.sol";
+import "openzeppelin-contracts/math/SafeMath.sol";
 
 // Note that this pool has no minter key of tSHARE (rewards).
 // Instead, the governance will call tSHARE distributeReward method and send reward to this pool at the beginning.
