@@ -12,4 +12,6 @@ interface ITreasury {
     function buyBonds(uint256 amount, uint256 targetPrice) external;
 
     function redeemBonds(uint256 amount, uint256 targetPrice) external;
+
+    function allocateSeigniorage() external;
 }
