@@ -46,11 +46,7 @@ contract Treasury is ContractGuard {
     uint256 public epochSupplyContractionLeft = 0;
 
     // exclusions from total supply
-    address[] public excludedFromTotalSupply = [
-        address(0x9A896d3c54D7e45B558BD5fFf26bF1E8C031F93b), // TombGenesisPool
-        address(0xa7b9123f4b15fE0fF01F469ff5Eab2b41296dC0E), // new TombRewardPool
-        address(0xA7B16703470055881e7EE093e9b0bF537f29CD4d) // old TombRewardPool
-    ];
+    address[] public excludedFromTotalSupply;
 
     // core components
     address public tomb;
@@ -255,7 +251,7 @@ contract Treasury is ContractGuard {
         masonry = _masonry;
         startTime = _startTime;
 
-        tombPriceOne = 10**18;
+        tombPriceOne = 10**6; // 1 USDC
         tombPriceCeiling = tombPriceOne.mul(101).div(100);
 
         // Dynamic max expansion percent
@@ -294,6 +290,10 @@ contract Treasury is ContractGuard {
 
     function setTombOracle(address _tombOracle) external onlyOperator {
         tombOracle = _tombOracle;
+    }
+
+    function setExcludedFromTotalSupply(address _excluded) external onlyOperator {
+        excludedFromTotalSupply.push(_excluded);
     }
 
     function setTombPriceCeiling(uint256 _tombPriceCeiling) external onlyOperator {

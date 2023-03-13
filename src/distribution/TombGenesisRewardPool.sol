@@ -51,7 +51,7 @@ contract TombGenesisRewardPool {
 
     uint256 public tombPerSecond = 0.19097 ether; // 33000 TOMB / (48h * 60min * 60s)
     uint256 public runningTime = 48 hours;
-    uint256 public constant TOTAL_REWARDS = 11000 ether;
+    uint256 public constant TOTAL_REWARDS = 33000 ether;
     uint256 public constant MAX_DEPOSIT_FEE = 100; // 10% max deposit fee
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);

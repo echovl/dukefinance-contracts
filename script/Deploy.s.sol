@@ -10,6 +10,7 @@ import "src/Oracle.sol";
 import "src/Masonry.sol";
 import "src/Treasury.sol";
 import "src/distribution/TombGenesisRewardPool.sol";
+import "src/distribution/TShareRewardPool.sol";
 
 import "src/interfaces/ITreasury.sol";
 import "src/interfaces/IUniswapV2Router.sol";
@@ -40,6 +41,7 @@ contract Deploy is Script {
 
         bool isProduction = config.readBool(".production");
         uint256 genesisStartTime = config.readUint(".genesisStartTime");
+        uint256 tshareIncentivesStartTime = config.readUint(".tshareIncentivesStartTime");
         uint256 treasuryStartTime = config.readUint(".treasuryStartTime");
 
         vm.startBroadcast();
@@ -104,12 +106,21 @@ contract Deploy is Script {
         // Genesis pools
         TombGenesisRewardPool genesisPool = new TombGenesisRewardPool(address(tomb), genesisStartTime, devFund);
 
+        // Tshare pool
+        TShareRewardPool tsharePool = new TShareRewardPool(address(tshare), tshareIncentivesStartTime);
+
         // Fund genesis pool
         tomb.distributeReward(address(genesisPool));
+
+        // Fund tshare pool
+        tshare.distributeReward(address(tsharePool));
 
         // Setup genesis pools
         genesisPool.add(1000, IERC20(nativePair), false, 0, 10);
         genesisPool.add(1000, IERC20(usdc), true, 0, 10);
+
+        // Exclude genesis pool from TOMB total supply
+        treasury.setExcludedFromTotalSupply(address(genesisPool));
 
         // Transfer operator to Treasury
         oracle.transferOperator(address(treasury));
