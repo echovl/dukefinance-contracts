@@ -7,7 +7,7 @@ import "forge-std/Script.sol";
 import "src/interfaces/ITreasury.sol";
 
 contract AllocateTreasury is Script {
-    address treasury = 0x236e6e982E13F53864A67E763E7D7eBC3323bAeB;
+    address treasury = 0xCb8981dBAB2B5F21674De1E9520015331E90C9f5;
 
     function run() public {
         vm.startBroadcast();

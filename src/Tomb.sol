@@ -118,7 +118,7 @@ contract Tomb is ERC20Burnable, Operator {
 
     function _getTombPrice() internal view returns (uint256 _tombPrice) {
         try IOracle(tombOracle).consult(address(this), 1e18) returns (uint144 _price) {
-            return uint256(_price);
+            return uint256(_price).mul(1e12);
         } catch {
             revert("Tomb: failed to fetch TOMB price from Oracle");
         }

@@ -14,4 +14,6 @@ interface ITreasury {
     function redeemBonds(uint256 amount, uint256 targetPrice) external;
 
     function allocateSeigniorage() external;
+
+    function setBootstrap(uint256 _bootstrapEpochs, uint256 _bootstrapSupplyExpansionPercent) external;
 }

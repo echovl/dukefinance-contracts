@@ -155,7 +155,7 @@ contract Treasury is ContractGuard {
     // oracle
     function getTombPrice() public view returns (uint256 tombPrice) {
         try IOracle(tombOracle).consult(tomb, 1e18) returns (uint144 price) {
-            return uint256(price);
+            return uint256(price).mul(1e12);
         } catch {
             revert("Treasury: failed to consult TOMB price from the oracle");
         }
@@ -163,7 +163,7 @@ contract Treasury is ContractGuard {
 
     function getTombUpdatedPrice() public view returns (uint256 _tombPrice) {
         try IOracle(tombOracle).twap(tomb, 1e18) returns (uint144 price) {
-            return uint256(price);
+            return uint256(price).mul(1e12);
         } catch {
             revert("Treasury: failed to consult TOMB price from the oracle");
         }
@@ -251,7 +251,7 @@ contract Treasury is ContractGuard {
         masonry = _masonry;
         startTime = _startTime;
 
-        tombPriceOne = 10**6; // 1 USDC
+        tombPriceOne = 10**18;
         tombPriceCeiling = tombPriceOne.mul(101).div(100);
 
         // Dynamic max expansion percent
